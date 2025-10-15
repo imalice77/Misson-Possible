@@ -1,0 +1,166 @@
+{
+  "title": "Misson Possible",
+  "credits": "Created by Alice Gu",
+  "start": {"x": 0, "y": 0},
+  "end": {"x": 2, "y": 1},
+
+  "rooms": {
+    "0_0": {
+      "name": "Rooftop Drop-off",
+      "description": "A cold rooftop under a moonlit sky. A rope ladder hangs down the building's side. A small grappling hook kit is tucked behind an air vent.",
+      "items": ["grappling_hook"],
+      "requires": []
+    },
+
+    "0_1": {
+      "name": "Service Stairwell",
+      "description": "A narrow stairwell used by maintenance crews. The lights are dim and flicker occasionally.",
+      "items": ["flashlight"],
+      "requires": []
+    },
+
+    "1_0": {
+      "name": "Loading Bay (Side Entrance)",
+      "description": "A secured roll-up door. A card reader is mounted beside it; without the right credential, the door stays closed.",
+      "items": [],
+      "requires": ["maintenance_keycard"]
+    },
+
+    "1_1": {
+      "name": "CCTV Corridor",
+      "description": "A long corridor monitored by rotating cameras. You can see a security guard's locker at the far end.",
+      "items": ["guard_uniform"],
+      "requires": []
+    },
+
+    "2_0": {
+      "name": "Security Office",
+      "description": "Monitors line the walls. A terminal sits on a desk with a USB slot and a small printed access code taped to the underside of the desk.",
+      "items": ["printed_code"],
+      "requires": ["guard_uniform"],
+      "dark": false
+    },
+
+    "2_1": {
+      "name": "Main Server Room",
+      "description": "Rows of server racks hum with power. The room is behind a thick access door with a biometric scanner.",
+      "items": ["encrypted_drive"],
+      "requires": ["biometric_chip"],
+      "dark": true
+    },
+
+    "1_2": {
+      "name": "Maintenance Closet",
+      "description": "A cramped closet full of tools and vents. A small toolbox contains a crowbar and a maintenance keycard tucked inside a pouch.",
+      "items": ["crowbar", "maintenance_keycard"],
+      "requires": []
+    },
+
+    "0_2": {
+      "name": "Vent Shaft",
+      "description": "A metallic vent shaft big enough to crawl through. It connects parts of the building off the main corridors.",
+      "items": [],
+      "requires": ["grappling_hook"]
+    },
+
+    "2_2": {
+      "name": "Locked Archive",
+      "description": "A secured archive room with a keypad lock. A cabinet inside might hold a biometric chip if opened.",
+      "items": ["biometric_chip"],
+      "requires": ["keypad_passcode"]
+    }
+  },
+
+  "interactions": {
+    "flashlight": {
+      "type": "single",
+      "description": "Toggle the flashlight on or off. When the flashlight is on you can safely explore dark rooms marked with \"dark\": true. (Consumes no fuel in this demo.)",
+      "effects": {
+        "sets_state": { "flashlight_on": true }
+      }
+    },
+
+    "crowbar": {
+      "type": "single",
+      "description": "Use the crowbar to pry open stuck panels or forced doors. May reveal hidden items in the current room.",
+      "effects": {
+        "gives_item": "hidden_access_card",
+        "note": "Using the crowbar may break it; in a real game you might remove the crowbar afterward."
+      }
+    },
+
+    "inspect_desk": {
+      "type": "single",
+      "description": "Carefully inspect the security office desk. You might find a small slip with a keypad passcode taped to the underside.",
+      "requires_item": ["guard_uniform"],
+      "effects": {
+        "gives_item": "keypad_passcode",
+        "consumes_items": []
+      }
+    },
+
+    "hack_terminal": {
+      "type": "multi",
+      "description": "Plug a hacking USB into the security terminal and run your exploit. Requires a hacking USB and either a printed access code or temporary credential.",
+      "required_items": ["hacking_usb"],
+      "alt_requirements": [
+        ["printed_code"],
+        ["hidden_access_card"]
+      ],
+      "effects": {
+        "unlocks_room": "2_2",
+        "gives_item": "remote_override_token",
+        "note": "This interaction may silently disable some camera sweeps (handled by rules.js)."
+      }
+    },
+
+    "combine_biometric": {
+      "type": "multi",
+      "description": "Combine the biometric chip with a remote override token to simulate an authorized fingerprint. This fools the server-room scanner.",
+      "required_items": ["biometric_chip", "remote_override_token"],
+      "effects": {
+        "unlocks_room": "2_1",
+        "consumes_items": ["remote_override_token"]
+      }
+    },
+
+    "distract_guard": {
+      "type": "single",
+      "description": "Make a noise or create a minor distraction to draw the guard away from the CCTV Corridor for a short time. Works better if you have a crowbar or grappling hook.",
+      "required_items": [],
+      "effects": {
+        "sets_state": { "guard_distracted": true },
+        "gives_item_if": {
+          "condition_items": ["crowbar"],
+          "gives_item": "hacking_usb"
+        }
+      }
+    },
+
+    "search_locker": {
+      "type": "single",
+      "description": "Search the guard's locker carefully. If the guard is distracted, you can retrieve useful items without being noticed.",
+      "requires_item": ["guard_distracted"],
+      "effects": {
+        "gives_item": "printed_code"
+      }
+    }
+  },
+
+  "item_values": {
+    "grappling_hook": 15,
+    "flashlight": 5,
+    "maintenance_keycard": 25,
+    "guard_uniform": 20,
+    "printed_code": 10,
+    "crowbar": 8,
+    "biometric_chip": 50,
+    "encrypted_drive": 100,
+    "hacking_usb": 30,
+    "remote_override_token": 40,
+    "keypad_passcode": 20,
+    "hidden_access_card": 18,
+    "hidden_access_card_used": 0,
+    "hidden_access_card_broken": 0
+  }
+}
